@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juliette Magro — Designer graphique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --paper:#faf9f6;
+    --line: rgba(26,26,26,0.12);
+    --accent:#ff5a4e;
+    --muted:#77766c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper); color:var(--ink); font-family:'Space Grotesk', sans-serif; overflow-x:hidden;}
+  body.loading{overflow:hidden; height:100vh;}
+  ::selection{background:var(--accent); color:#fff;}
+  h1,h2,h3{font-family:'Fraunces', serif; line-height:1.05; letter-spacing:-0.01em; font-weight:500;}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  section{padding:clamp(3.5rem,7vw,6rem) clamp(1.5rem,6vw,5rem);}
+  .wrap{max-width:1140px; margin:0 auto;}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:0.6em;
+  }
+  .eyebrow::before{content:''; width:6px; height:6px; background:var(--accent); border-radius:50%; display:inline-block;}
+
+  /* ===== LOADER ===== */
+  #loader{
+    position:fixed; inset:0; z-index:999; background:var(--paper);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.4rem;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #loader.hide{opacity:0; visibility:hidden; pointer-events:none;}
+  #loader svg{width:200px; height:200px;}
+  .loader-label{font-family:'JetBrains Mono', monospace; font-size:0.72rem; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;}
+  .loader-bar{width:120px; height:2px; background:var(--line); position:relative; overflow:hidden; border-radius:2px;}
+  .loader-bar::after{
+    content:''; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--ink);
+    animation:barslide 1.3s ease-in-out infinite;
+  }
+  @keyframes barslide{0%{left:-40%;} 50%{left:60%;} 100%{left:100%;}}
+
+  #eyes{ animation:thinking 5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+  @keyframes thinking{
+    0%,14%,100%{transform:translate(0,0);}
+    5%,10%{transform:translate(-2.5px,-3px);}
+  }
+  .tdot{ animation:tfade 5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; opacity:0; }
+  .tdot.d1{animation-delay:0s;}
+  .tdot.d2{animation-delay:.18s;}
+  .tdot.d3{animation-delay:.36s;}
+  @keyframes tfade{
+    0%,10%{opacity:0; transform:translateY(0);}
+    18%,35%{opacity:1; transform:translateY(-2px);}
+    46%,100%{opacity:0; transform:translateY(0);}
+  }
+  #arm{ animation:armtap 5s ease-in-out infinite; transform-box:fill-box; transform-origin:88% 78%; }
+  @keyframes armtap{
+    0%,55%{transform:rotate(0deg);}
+    64%{transform:rotate(-16deg);}
+    70%{transform:rotate(-19deg);}
+    78%{transform:rotate(0deg);}
+    100%{transform:rotate(0deg);}
+  }
+  #ripple{ animation:ripple 5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; opacity:0; }
+  @keyframes ripple{
+    0%,62%{opacity:0; transform:scale(0.3);}
+    68%{opacity:.7; transform:scale(0.7);}
+    80%{opacity:0; transform:scale(1.6);}
+    100%{opacity:0; transform:scale(1.6);}
+  }
+  #head{ animation:bob 5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+  @keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(-1.5px);}}
+
+  @media (prefers-reduced-motion: reduce){
+    #eyes,.tdot,#arm,#ripple,#head,.loader-bar::after{animation:none !important;}
+  }
+
+  /* ===== NAV ===== */
+  .nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.1rem clamp(1.5rem,6vw,5rem);
+    background:rgba(250,249,246,0.88); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav .logo{font-family:'Fraunces', serif; font-weight:500; font-size:1.1rem;}
+  .nav-links{display:flex; gap:2.1rem; list-style:none;}
+  .nav-links a{
+    font-family:'JetBrains Mono', monospace; font-size:0.75rem; text-decoration:none;
+    letter-spacing:0.04em; padding-bottom:3px; border-bottom:1.5px solid transparent;
+    transition:border-color .2s ease;
+  }
+  .nav-links a:hover{border-color:var(--accent);}
+  .menu-btn{display:none; background:none; border:none; font-size:1.3rem; cursor:pointer;}
+
+  /* ===== HERO ===== */
+  .hero{min-height:92vh; display:flex; flex-direction:column; justify-content:center; padding-top:6rem;}
+  .hero-inner{max-width:1140px; margin:0 auto; width:100%;}
+  .hero h1{font-size:clamp(2.6rem,7.5vw,5.2rem); max-width:15ch;}
+  .hero h1 em{font-style:italic; color:var(--accent);}
+  .hero p.tagline{margin-top:1.4rem; font-size:clamp(1rem,1.6vw,1.2rem); max-width:38ch; color:var(--muted);}
+  .hero-cta{margin-top:2.4rem; display:flex; gap:1rem; flex-wrap:wrap;}
+  .btn{
+    font-family:'JetBrains Mono', monospace; font-size:0.8rem; letter-spacing:0.03em;
+    padding:0.9rem 1.5rem; border-radius:100px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:0.5em; transition:transform .2s ease, opacity .2s ease;
+  }
+  .btn-primary{background:var(--ink); color:var(--paper);}
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-outline{border:1.5px solid var(--ink);}
+  .btn-outline:hover{transform:translateY(-2px);}
+  .scroll-cue{margin-top:3.5rem; font-family:'JetBrains Mono', monospace; font-size:0.68rem; color:var(--muted); display:flex; align-items:center; gap:0.6rem;}
+  .scroll-cue .line{width:34px; height:1px; background:var(--muted);}
+
+  /* ===== PROJETS ===== */
+  .projects-head{display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; margin-bottom:2.6rem; border-bottom:1px solid var(--line); padding-bottom:1.6rem;}
+  .projects-head h2{font-size:clamp(1.8rem,3.6vw,2.6rem);}
+  .project-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+  .project-card{background:var(--paper); padding:2.2rem; transition:background .2s ease;}
+  .project-card:hover{background:var(--paper-hover, #f2f0ea);}
+  .project-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2.4rem;}
+  .project-num{font-family:'JetBrains Mono', monospace; font-size:0.72rem; color:var(--muted);}
+  .project-tag{font-family:'JetBrains Mono', monospace; font-size:0.68rem; border:1px solid var(--line); padding:0.3rem 0.6rem; border-radius:100px; color:var(--muted);}
+  .project-card h3{font-size:1.4rem;}
+  .project-card p{margin-top:0.6rem; color:var(--muted); font-size:0.92rem; line-height:1.55; max-width:34ch;}
+
+  /* ===== CV ===== */
+  .cv-grid{display:grid; grid-template-columns:0.8fr 1.2fr; gap:clamp(2rem,6vw,4.5rem);}
+  .cv-head h2{font-size:clamp(1.8rem,3.6vw,2.6rem);}
+  .cv-head p{margin-top:1rem; color:var(--muted); line-height:1.6; max-width:32ch;}
+  .cv-download{
+    margin-top:1.8rem; display:inline-flex; align-items:center; gap:0.6em;
+    font-family:'JetBrains Mono', monospace; font-size:0.78rem;
+    border:1.5px solid var(--ink); padding:0.8rem 1.3rem; border-radius:100px; text-decoration:none;
+    transition:transform .2s ease;
+  }
+  .cv-download:hover{transform:translateY(-2px);}
+  .timeline{border-left:1.5px solid var(--line); padding-left:1.8rem; display:flex; flex-direction:column; gap:2rem;}
+  .tl-item{position:relative;}
+  .tl-item::before{content:''; position:absolute; left:-2.28rem; top:0.3rem; width:8px; height:8px; border-radius:50%; background:var(--accent);}
+  .tl-year{font-family:'JetBrains Mono', monospace; font-size:0.72rem; color:var(--muted);}
+  .tl-item h3{font-size:1.1rem; margin-top:0.3rem;}
+  .tl-item p{margin-top:0.4rem; color:var(--muted); font-size:0.9rem; line-height:1.55;}
+
+  /* ===== A PROPOS ===== */
+  .about{background:#f2f0ea;}
+  .about-grid{display:grid; grid-template-columns:0.85fr 1.15fr; gap:clamp(2rem,6vw,4.5rem); align-items:center;}
+  .about-portrait{aspect-ratio:1/1; border-radius:var(--radius); border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; background:var(--paper);}
+  .about h2{font-size:clamp(1.8rem,3.6vw,2.6rem);}
+  .about-text p{margin-top:1.1rem; line-height:1.7; color:var(--ink); font-size:1rem; max-width:44ch;}
+  .skills{margin-top:1.8rem; display:flex; flex-wrap:wrap; gap:0.55rem;}
+  .skill-pill{font-family:'JetBrains Mono', monospace; font-size:0.74rem; padding:0.45rem 0.85rem; border-radius:100px; border:1px solid var(--line); color:var(--muted);}
+
+  /* ===== CONTACT ===== */
+  .contact{background:var(--ink); color:var(--paper);}
+  .contact .eyebrow{color:#9a988e;}
+  .contact .eyebrow::before{background:var(--accent);}
+  .contact h2{font-size:clamp(2rem,5.5vw,3.6rem); font-weight:500; max-width:16ch; margin-top:0.9rem;}
+  .contact h2 em{font-style:italic; color:var(--accent);}
+  .contact-row{margin-top:2.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.4rem; border-top:1px solid rgba(250,249,246,0.16); padding-top:1.8rem;}
+  .contact-links{display:flex; gap:1.6rem; flex-wrap:wrap;}
+  .contact-links a{font-family:'JetBrains Mono', monospace; font-size:0.8rem; text-decoration:none; color:var(--paper); border-bottom:1px solid rgba(250,249,246,0.28); padding-bottom:2px;}
+  .contact-links a:hover{border-color:var(--accent); color:var(--accent);}
+  .contact .btn-primary{background:var(--accent); color:#fff;}
+  footer{text-align:center; padding:1.8rem; font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:#9a988e; background:var(--ink);}
+
+  @media (max-width:860px){
+    .nav-links{position:fixed; top:60px; left:0; right:0; background:var(--paper); flex-direction:column; padding:1.4rem 2rem; gap:1.2rem; transform:translateY(-130%); transition:transform .3s ease; border-bottom:1px solid var(--line);}
+    .nav-links.open{transform:translateY(0);}
+    .menu-btn{display:block;}
+    .project-grid{grid-template-columns:1fr;}
+    .cv-grid{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body class="loading">
+
+<!-- ===== LOADER : illustration animee ligne minimaliste ===== -->
+<div id="loader">
+  <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- bureau -->
+    <line x1="20" y1="176" x2="200" y2="176"/>
+    <!-- ecran d'ordinateur -->
+    <rect x="60" y="122" width="100" height="54" rx="6"/>
+    <line x1="96" y1="176" x2="124" y2="176"/>
+    <circle id="ripple" cx="110" cy="149" r="10" fill="#ff5a4e" stroke="none"/>
+    <!-- corps / epaules -->
+    <path d="M64 176 C64 148 78 138 110 138 C142 138 156 148 156 176" />
+    <!-- tete -->
+    <g id="head">
+      <circle cx="110" cy="92" r="30"/>
+      <!-- frange -->
+      <path d="M82 84 C86 62 134 62 138 84 C134 76 86 76 82 84Z" fill="#1a1a1a" stroke="none"/>
+      <!-- lunettes -->
+      <rect x="85" y="90" width="20" height="15" rx="5"/>
+      <rect x="115" y="90" width="20" height="15" rx="5"/>
+      <line x1="105" y1="96" x2="115" y2="96"/>
+      <!-- yeux -->
+      <g id="eyes">
+        <circle cx="95" cy="97" r="1.8" fill="#1a1a1a" stroke="none"/>
+        <circle cx="125" cy="97" r="1.8" fill="#1a1a1a" stroke="none"/>
+      </g>
+      <!-- bouche -->
+      <path d="M103 112 Q110 116 117 112" stroke-width="1.8"/>
+    </g>
+    <!-- bras qui tape l'ecran -->
+    <path id="arm" d="M150 172 C160 160 158 145 148 136" stroke-width="2.2"/>
+    <!-- bulles de reflexion -->
+    <circle class="tdot d1" cx="150" cy="52" r="2.4" fill="#1a1a1a" stroke="none"/>
+    <circle class="tdot d2" cx="158" cy="42" r="3.2" fill="#1a1a1a" stroke="none"/>
+    <circle class="tdot d3" cx="168" cy="30" r="4.2" fill="#1a1a1a" stroke="none"/>
+  </svg>
+  <p class="loader-label">Chargement</p>
+  <div class="loader-bar"></div>
+</div>
+
+<!-- ===== NAV ===== -->
+<nav class="nav">
+  <div class="logo">Alex Dupont</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#accueil">Accueil</a></li>
+    <li><a href="#projets">Projets</a></li>
+    <li><a href="#cv">CV</a></li>
+    <li><a href="#apropos">À propos</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="menu-btn" id="menuBtn" aria-label="Ouvrir le menu">☰</button>
+</nav>
+
+<!-- ===== HERO ===== -->
+<!-- MODIFIE ICI : ton nom, ton accroche -->
+<section class="hero" id="accueil">
+  <div class="hero-inner">
+    <p class="eyebrow">Designer graphique — disponible pour missions</p>
+    <h1>Je donne une <em>identité</em> visuelle aux idées qui en manquent.</h1>
+    <p class="tagline">Identité de marque, direction artistique et design d'interface, avec une préférence pour la clarté et les détails qui font sens.</p>
+    <div class="hero-cta">
+      <a href="#projets" class="btn btn-primary">Voir mes projets</a>
+      <a href="#contact" class="btn btn-outline">Me contacter</a>
+    </div>
+    <div class="scroll-cue"><span class="line"></span><span>Scroll pour découvrir mes derniers projets</span></div>
+  </div>
+</section>
+
+<!-- ===== PROJETS (mis en avant juste apres le hero) ===== -->
+<!-- MODIFIE ICI : remplace par tes vrais projets -->
+<section id="projets">
+  <div class="wrap">
+    <div class="projects-head">
+      <div>
+        <p class="eyebrow">Sélection</p>
+        <h2>Derniers projets</h2>
+      </div>
+    </div>
+    <div class="project-grid">
+      <div class="project-card">
+        <div class="project-top"><span class="project-num">01</span><span class="project-tag">Identité de marque</span></div>
+        <h3>Studio Ficelle</h3>
+        <p>Refonte complète de l'identité visuelle d'un studio de céramique, du logo aux packagings.</p>
+      </div>
+      <div class="project-card">
+        <div class="project-top"><span class="project-num">02</span><span class="project-tag">UI Design</span></div>
+        <h3>Application Nomade</h3>
+        <p>Design d'interface pour une app de voyage, avec un système visuel par destination.</p>
+      </div>
+      <div class="project-card">
+        <div class="project-top"><span class="project-num">03</span><span class="project-tag">Édition</span></div>
+        <h3>Revue Lumière</h3>
+        <p>Direction artistique et mise en page d'un magazine trimestriel indépendant.</p>
+      </div>
+      <div class="project-card">
+        <div class="project-top"><span class="project-num">04</span><span class="project-tag">Motion & Illustration</span></div>
+        <h3>Festival Kaléidoscope</h3>
+        <p>Univers visuel et animations pour un festival de musique électronique.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CV ===== -->
+<!-- MODIFIE ICI : ton parcours et le lien vers ton vrai CV en PDF -->
+<section id="cv">
+  <div class="wrap cv-grid">
+    <div class="cv-head">
+      <p class="eyebrow">Parcours</p>
+      <h2>Mon CV</h2>
+      <p>Quelques étapes clés de mon parcours. Le détail complet est disponible en téléchargement.</p>
+      <a href="#" class="cv-download" download>↓ Télécharger le CV (PDF)</a>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <p class="tl-year">2023 — Aujourd'hui</p>
+        <h3>Designer graphique indépendante</h3>
+        <p>Identité de marque et direction artistique pour studios, marques et festivals.</p>
+      </div>
+      <div class="tl-item">
+        <p class="tl-year">2021 — 2023</p>
+        <h3>Designer UI/UX — Studio Mirage</h3>
+        <p>Conception d'interfaces pour applications mobiles et web.</p>
+      </div>
+      <div class="tl-item">
+        <p class="tl-year">2018 — 2021</p>
+        <h3>Master Design Graphique</h3>
+        <p>Formation en identité visuelle, typographie et direction artistique.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== A PROPOS (encart) ===== -->
+<!-- MODIFIE ICI : ta bio et tes compétences -->
+<section class="about" id="apropos">
+  <div class="wrap about-grid">
+    <div class="about-portrait">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--muted);">Ta photo ici</span>
+    </div>
+    <div>
+      <p class="eyebrow">À propos</p>
+      <h2>Bonjour, moi c'est Alex.</h2>
+      <div class="about-text">
+        <p>Designer graphique depuis 6 ans, je travaille avec des marques et des studios qui veulent une image forte et sans compromis, où chaque détail a une raison d'être.</p>
+      </div>
+      <div class="skills">
+        <span class="skill-pill">Identité de marque</span>
+        <span class="skill-pill">Direction artistique</span>
+        <span class="skill-pill">Typographie</span>
+        <span class="skill-pill">UI Design</span>
+        <span class="skill-pill">Figma / Adobe CC</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<!-- MODIFIE ICI : ton email et tes réseaux -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <p class="eyebrow">Contact</p>
+    <h2>Une idée en tête ? <em>Discutons-en.</em></h2>
+    <div class="contact-row">
+      <a href="mailto:alex.dupont@example.com" class="btn btn-primary">alex.dupont@example.com</a>
+      <div class="contact-links">
+        <a href="#" target="_blank" rel="noopener">Instagram</a>
+        <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="#" target="_blank" rel="noopener">Behance</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 Alex Dupont — Site conçu avec Claude</footer>
+
+<script>
+  const menuBtn = document.getElementById('menuBtn');
+  const navLinks = document.getElementById('navLinks');
+  menuBtn.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  const loader = document.getElementById('loader');
+  const minTime = new Promise(res => setTimeout(res, 2600));
+  const pageLoaded = new Promise(res => {
+    if(document.readyState === 'complete') res();
+    else window.addEventListener('load', res);
+  });
+  Promise.all([minTime, pageLoaded]).then(() => {
+    loader.classList.add('hide');
+    document.body.classList.remove('loading');
+  });
+</script>
+
+</body>
+</html>
